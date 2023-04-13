@@ -6,15 +6,16 @@ const bcrypt = require("bcrypt");
 const fs = require("fs");
 
 router.get("/getMemberOrderData/:memberSid", async (req, res) => {
-  console.log(req.params);
+
   const { memberSid } = req.params;
   const memberOredrDataSql = `
     SELECT * FROM order_summary 
-    JOIN games ON gameSid = games.gamesSid 
+    JOIN games ON order_summary.gameSid = games.gamesSid 
     JOIN discount_detail ON orderDiscount = discount_detail.discountID
-    WHERE memberSid = ${memberSid}
+    WHERE order_summary.memberSid = ${memberSid}
     `;
   const [memberOredrDataInfo] = await db.query(memberOredrDataSql);
+  console.log(memberOredrDataInfo);
   res.json(memberOredrDataInfo);
 });
 
@@ -80,10 +81,9 @@ router.post("/memberInfo/:memberSid", async (req, res) => {
     identity,
     LogoImg,
     remark,
-    originalLogos
   } = req.body;
   const editMemberSql = `
-    UPDATE member SET memNickName='${nick}',memHeadshot='${originalLogos}',memPassword='${password}',memName='${user}',memGender='${gender}',memBirth='${birther}',memEmail='${email}',memMobile='${phone}',memIdentity='${identity}',memEditAt=now() WHERE membersid  = ${memberSid}
+    UPDATE member SET memNickName='${nick}',memHeadshot='${LogoImg}',memPassword='${password}',memName='${user}',memGender='${gender}',memBirth='${birther}',memEmail='${email}',memMobile='${phone}',memIdentity='${identity}',memEditAt=now() WHERE membersid  = ${memberSid}
     `;
   const [editMemberInfo] = await db.query(editMemberSql);
   res.json(editMemberInfo);
@@ -95,18 +95,18 @@ router.get("/memberInfo/:memberSid", async (req, res) => {
     SELECT * FROM member WHERE membersid  = ${memberSid}
     `;
   const [memberInfoInfo] = await db.query(memberInfoSql);
-  const memberInfoData = memberInfoInfo.map((v, i) => {
-    if (v.memHeadshot.length > 20) {
-      local_img = `./public/uploads/${v.memHeadshot}`;
-      let bitmap = fs.readFileSync(local_img);
-      let base64str = Buffer.from(bitmap, "kai").toString("base64");
-      return { ...v, memHeadshot: `data:image/png;base64,${base64str}` };
-    } else {
-      return { ...v };
-    }
-  });
+  // const memberInfoData = memberInfoInfo.map((v, i) => {
+  //   if (v.memHeadshot.length > 20) {
+  //     local_img = `./public/uploads/${v.memHeadshot}`;
+  //     let bitmap = fs.readFileSync(local_img);
+  //     let base64str = Buffer.from(bitmap, "kai").toString("base64");
+  //     return { ...v, memHeadshot: `data:image/png;base64,${base64str}` };
+  //   } else {
+  //     return { ...v };
+  //   }
+  // });
 
-  res.json(memberInfoData);
+  res.json(memberInfoInfo);
 });
 
 module.exports = router;

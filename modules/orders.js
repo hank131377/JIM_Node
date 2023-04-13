@@ -16,17 +16,17 @@ router.get("/", async (req, res) => {
     JOIN store on games.storeSid= store.storeSid
     WHERE gamesSid = ${sid}`;
   const [orderData] = await db.query(orderSql);
-  const ordersData = orderData.map((v, i) => {
-    if (v.gamesImages.length > 20) {
-      local_img = `./public/uploads/${v.gamesImages}`;
-      let bitmap = fs.readFileSync(local_img);
-      let base64str = Buffer.from(bitmap, "kai").toString("base64");
-      return { ...v, gamesImages: `data:image/png;base64,${base64str}` };
-    } else {
-      return { ...v };
-    }
-  });
-  res.json(ordersData);
+  // const ordersData = orderData.map((v, i) => {
+  //   if (v.gamesImages.length > 20) {
+  //     local_img = `./public/uploads/${v.gamesImages}`;
+  //     let bitmap = fs.readFileSync(local_img);
+  //     let base64str = Buffer.from(bitmap, "kai").toString("base64");
+  //     return { ...v, gamesImages: `data:image/png;base64,${base64str}` };
+  //   } else {
+  //     return { ...v };
+  //   }
+  // });
+  res.json(orderData);
 });
 
 router.get("/ordercomplete", async (req, res) => {

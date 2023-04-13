@@ -16,17 +16,17 @@ router.get("/", async (req, res) => {
     ORDER BY gamesSid ASC
     limit ${litim}`;
   const [game] = await db.query(gamesql);
-  const games = game.map((v, i) => {
-    if (v.gamesImages.length > 20) {
-      local_img = `./public/uploads/${v.gamesImages}`;
-      let bitmap = fs.readFileSync(local_img);
-      let base64str = Buffer.from(bitmap, "kai").toString("base64");
-      return { ...v, gamesImages: `data:image/png;base64,${base64str}` };
-    } else {
-      return { ...v };
-    }
-  });
-  res.json(games);
+  // const games = game.map((v, i) => {
+  //   if (v.gamesImages.length > 20) {
+  //     local_img = `./public/uploads/${v.gamesImages}`;
+  //     let bitmap = fs.readFileSync(local_img);
+  //     let base64str = Buffer.from(bitmap, "kai").toString("base64");
+  //     return { ...v, gamesImages: `data:image/png;base64,${base64str}` };
+  //   } else {
+  //     return { ...v };
+  //   }
+  // });
+  res.json(game);
 });
 
 module.exports = router;
