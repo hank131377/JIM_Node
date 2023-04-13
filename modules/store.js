@@ -64,11 +64,13 @@ router.post("/editStoreInfo/:storeSid", async (req, res) => {
     county,
     address,
     email,
-    time,
+    timeStart,
+      timeEnd,
     website,
     LogoImg,
     remark,
   } = req.body;
+  const time = `${timeStart}-${timeEnd}`
   const editStoreSql = `
         UPDATE store SET storeAccount='${account}',storePassword='${password}',storeLeader='${leader}',storeMobile='${mobile}',storeCity='${county}',storeAddress='${address}',storeEmail='${email}',storeTime='${time}',storeWebsite='${website}',storeLogo='${LogoImg}',storeNews='${remark}',storeEditAt=now() WHERE storeSid = ${storeSid}
         `;
@@ -83,17 +85,19 @@ router.get("/storeInfo/:storeSid", async (req, res) => {
             SELECT * FROM store WHERE storeSid = ${storeSid}
             `;
   const [storeInfoInfo] = await db.query(storeInfoSql);
-  const storeInfoData = storeInfoInfo.map((v, i) => {
-    if (v.storeLogo.length > 20) {
-      local_img = `./public/uploads/${v.storeLogo}`;
-      let bitmap = fs.readFileSync(local_img);
-      let base64str = Buffer.from(bitmap, "kai").toString("base64");
-      return { ...v, storeLogo: `data:image/png;base64,${base64str}` };
-    } else {
-      return { ...v };
-    }
-  });
-  res.json(storeInfoData);
+  storeInfoInfo[0].timeStart = storeInfoInfo[0].storeTime.split('-')[0]
+storeInfoInfo[0].timeEnd = storeInfoInfo[0].storeTime.split('-')[1]
+  // const storeInfoData = storeInfoInfo.map((v, i) => {
+  //   if (v.storeLogo.length > 20) {
+  //     local_img = `./public/uploads/${v.storeLogo}`;
+  //     let bitmap = fs.readFileSync(local_img);
+  //     let base64str = Buffer.from(bitmap, "kai").toString("base64");
+  //     return { ...v, storeLogo: `data:image/png;base64,${base64str}` };
+  //   } else {
+  //     return { ...v };
+  //   }
+  // });
+  res.json(storeInfoInfo);
 });
 
 router.get("/storeOredrData/:orderSid", async (req, res) => {
@@ -137,17 +141,17 @@ router.get("/getEditData/:sid", async (req, res) => {
             SELECT * FROM games WHERE gamesSid = ${sid}
             `;
   const [getEditDataInfo] = await db.query(getEditDataSql);
-  const getEditDataInfos = getEditDataInfo.map((v, i) => {
-    if (v.gamesImages.length > 20) {
-      local_img = `./public/uploads/${v.gamesImages}`;
-      let bitmap = fs.readFileSync(local_img);
-      let base64str = Buffer.from(bitmap, "kai").toString("base64");
-      return { ...v, gamesImages: `data:image/png;base64,${base64str}` };
-    } else {
-      return { ...v };
-    }
-  });
-  res.json(getEditDataInfos);
+  // const getEditDataInfos = getEditDataInfo.map((v, i) => {
+  //   if (v.gamesImages.length > 20) {
+  //     local_img = `./public/uploads/${v.gamesImages}`;
+  //     let bitmap = fs.readFileSync(local_img);
+  //     let base64str = Buffer.from(bitmap, "kai").toString("base64");
+  //     return { ...v, gamesImages: `data:image/png;base64,${base64str}` };
+  //   } else {
+  //     return { ...v };
+  //   }
+  // });
+  res.json(getEditDataInfo);
 });
 
 router.post("/putgame", async (req, res) => {
@@ -165,10 +169,10 @@ router.post("/putgame", async (req, res) => {
     time,
     put,
     remark,
-    originalLogos
   } = req.body;
+  console.log(time)
   const putGameSql = `
-            INSERT INTO games( gamesName, gamesImages, gamesPeopleMin, gamesPeopleMax, gamesDifficulty, gamesFeature01, gamesFeature02, gamesPrice, gamesSort, gamesTime, gamesOpen, gamesColse, gamesContent, storeSid, create_at, up_date) VALUES ('${name}','${originalLogos}',${min},${max},${difficulty},${feature01},${feature02},${price},${other},${time},now(),${put},'${remark}','${sid}',now(),now())`;
+            INSERT INTO games( gamesName, gamesImages, gamesPeopleMin, gamesPeopleMax, gamesDifficulty, gamesFeature01, gamesFeature02, gamesPrice, gamesSort, gamesTime, gamesOpen, gamesColse, gamesContent, storeSid, create_at, up_date) VALUES ('${name}','${LogoImg}',${min},${max},${difficulty},${feature01},${feature02},${price},${other},${time},now(),${put},'${remark}','${sid}',now(),now())`;
   const [putgameInfo] = await db.query(putGameSql);
   res.json(putgameInfo);
 });

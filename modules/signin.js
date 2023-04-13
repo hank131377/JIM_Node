@@ -32,7 +32,7 @@ router.post("/store", upload.none(), async (req, res) => {
         store: rows[0].storeName,
         target: "store",
       },
-      process.env.JWT_SECRET_KEY
+      process.env.JWT_SECRET
     );
   }
   output.success = true;
@@ -42,41 +42,15 @@ router.post("/store", upload.none(), async (req, res) => {
     (output.account = rows[0].storeAccount),
     (output.store = rows[0].storeName),
     (output.target = "store");
-  if (rows[0].storeLogo.length > 20) {
-    local_img = `./public/uploads/${rows[0].storeLogo}`;
-    let bitmap = fs.readFileSync(local_img);
-    let base64str = Buffer.from(bitmap, "kai").toString("base64");
-    output.logo = `data:image/png;base64,${base64str}`;
-  } else {
-    output.logo = rows[0].storeLogo;
-  }
-  // const sql = "SELECT * FROM admins WHERE account=?";
-  // const [rows] = await db.query(sql, [req.body.account]);
-  // if (!rows.length) {
-  //   output.code = 401;
-  //   return res.json(output);
-  // }
-  // if (!(await bcrypt.compare(req.body.password, rows[0].password_hash))) {
-  //   output.code = 402;
+  // if (rows[0].storeLogo.length > 20) {
+  //   local_img = `./public/uploads/${rows[0].storeLogo}`;
+  //   let bitmap = fs.readFileSync(local_img);
+  //   let base64str = Buffer.from(bitmap, "kai").toString("base64");
+  //   output.logo = `data:image/png;base64,${base64str}`;
   // } else {
-  //   output.token = jwt.sign(
-  //     {
-  //       sid: rows[0].sid,
-  //       account: rows[0].account,
-  //     },
-  //     process.env.JWT_SECRET_KEY
-  //   );
-  //   output.success = true;
-  //   output.code = 200;
-  //   output.error = "";
-  //   output.accountId = rows[0].sid;
-  //   (output.account = rows[0].account),
-  //     (req.session.admin = {
-  //       sid: rows[0].sid,
-  //       account: rows[0].account,
-  //     });
+  //   output.logo = rows[0].storeLogo;
   // }
-  // res.json(output);
+
   res.json(output);
 });
 
@@ -106,7 +80,7 @@ router.post("/member", upload.none(), async (req, res) => {
         store: rows[0].memName,
         target: "member",
       },
-      process.env.JWT_SECRET_KEY
+      process.env.JWT_SECRET
     );
   }
   output.success = true;
@@ -116,14 +90,14 @@ router.post("/member", upload.none(), async (req, res) => {
     (output.account = rows[0].memAccount),
     (output.store = rows[0].memName),
     (output.target = "member");
-  if (rows[0].memHeadshot.length > 20) {
-    local_img = `./public/uploads/${rows[0].memHeadshot}`;
-    let bitmap = fs.readFileSync(local_img);
-    let base64str = Buffer.from(bitmap, "kai").toString("base64");
-    output.logo = `data:image/png;base64,${base64str}`;
-  } else {
-    output.logo = rows[0].memHeadshot;
-  }
+  // if (rows[0].memHeadshot.length > 20) {
+  //   local_img = `./public/uploads/${rows[0].memHeadshot}`;
+  //   let bitmap = fs.readFileSync(local_img);
+  //   let base64str = Buffer.from(bitmap, "kai").toString("base64");
+  //   output.logo = `data:image/png;base64,${base64str}`;
+  // } else {
+  //   output.logo = rows[0].memHeadshot;
+  // }
   res.json(output);
 });
 
@@ -141,14 +115,15 @@ router.post("/setmemberinfo/:target", async (req, res) => {
       county,
       address,
       email,
-      time,
+      timeStart,
+      timeEnd,
       website,
       LogoImg,
       remark,
-      originalLogos
     } = req.body;
+    const time = `${timeStart}-${timeEnd}`
     setInfoSql = `
-      INSERT INTO store( storeName, storeAccount, storePassword, storeLeader, storeLeaderId, storeMobile, storeCity, storeAddress, storelat, storelon, storeEmail, storeTime, storeRest, storeWebsite, storeLogo, storeNews, storeCreatedAt, storeEditAt) VALUES ('${store}','${account}','${password}','${leader}','${identity}','${mobile}','${county}','${address}','','','${email}','${time}','','${website}','${  originalLogos}','${remark}',now(),now())`;
+      INSERT INTO store( storeName, storeAccount, storePassword, storeLeader, storeLeaderId, storeMobile, storeCity, storeAddress, storelat, storelon, storeEmail, storeTime, storeRest, storeWebsite, storeLogo, storeNews, storeCreatedAt, storeEditAt) VALUES ('${store}','${account}','${password}','${leader}','${identity}','${mobile}','${county}','${address}','','','${email}','${time}','','${website}','${LogoImg}','${remark}',now(),now())`;
   } else if (target == "member") {
     const {
       nick,
@@ -161,10 +136,9 @@ router.post("/setmemberinfo/:target", async (req, res) => {
       email,
       phone,
       identity,
-      originalLogos
     } = req.body;
     setInfoSql = `
-      INSERT INTO member( memNickName, memHeadshot, memAccount, memPassword, memName, memGender, memBirth, memEmail, memMobile, memIdentity, memCreatAt, memEditAt) VALUES ('${nick}','${  originalLogos}','${account}','${password}','${user}','${gender}','${birther}','${email}','${phone}','${identity}',now(),now())
+      INSERT INTO member( memNickName, memHeadshot, memAccount, memPassword, memName, memGender, memBirth, memEmail, memMobile, memIdentity, memCreatAt, memEditAt) VALUES ('${nick}','${LogoImg}','${account}','${password}','${user}','${gender}','${birther}','${email}','${phone}','${identity}',now(),now())
       `;
   } else {
     res.json("參數錯誤");

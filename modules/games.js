@@ -35,20 +35,20 @@ router.get("/", async (req, res) => {
     
   const [game] = await db.query(gamesql);
 
-  const games = game
-    .map((v, i) => {
-      if (v.gamesImages.length > 20) {
-        local_img = `./public/uploads/${v.gamesImages}`;
-        let bitmap = fs.readFileSync(local_img);
-        let base64str = Buffer.from(bitmap, "kai").toString("base64");
-        return { ...v, gamesImages: `data:image/png;base64,${base64str}` };
-      } else {
-        return { ...v };
-      }
-    })
+  // const games = game
+  //   .map((v, i) => {
+  //     if (v.gamesImages.length > 20) {
+  //       local_img = `./public/uploads/${v.gamesImages}`;
+  //       let bitmap = fs.readFileSync(local_img);
+  //       let base64str = Buffer.from(bitmap, "kai").toString("base64");
+  //       return { ...v, gamesImages: `data:image/png;base64,${base64str}` };
+  //     } else {
+  //       return { ...v };
+  //     }
+  //   })
 
 
-  res.json(games);
+  res.json(game);
 });
 
 router.get("/getGameSelect/:target", async (req, res) => {
@@ -80,16 +80,16 @@ router.get("/gameSingle", async (req, res) => {
         `;
   const [getGameSelectInfo] = await db.query(getGameSelectSql);
   const gamesSingle = gameSingleInfo
-    .map((v, i) => {
-      if (v.gamesImages.length > 20) {
-        local_img = `./public/uploads/${v.gamesImages}`;
-        let bitmap = fs.readFileSync(local_img);
-        let base64str = Buffer.from(bitmap, "kai").toString("base64");
-        return { ...v, gamesImages: `data:image/png;base64,${base64str}` };
-      } else {
-        return { ...v };
-      }
-    })
+    // .map((v, i) => {
+    //   if (v.gamesImages.length > 20) {
+    //     local_img = `./public/uploads/${v.gamesImages}`;
+    //     let bitmap = fs.readFileSync(local_img);
+    //     let base64str = Buffer.from(bitmap, "kai").toString("base64");
+    //     return { ...v, gamesImages: `data:image/png;base64,${base64str}` };
+    //   } else {
+    //     return { ...v };
+    //   }
+    // })
     .map((v, i) => {
       return getGameSelectInfo[i]?.gamesSid == v.gamesSid
         ? {
@@ -160,18 +160,18 @@ router.get("/getGameComment/:sid", async (req, res) => {
     ORDER BY order_summary.create_at DESC
     `;
   const [getGameCommentInfo] = await db.query(getGameCommentSql);
-  const getGameCommentInfoData = getGameCommentInfo
-  .map((v, i) => {
-    if (v.memHeadshot.length > 20) {
-      local_img = `./public/uploads/${v.memHeadshot}`;
-      let bitmap = fs.readFileSync(local_img);
-      let base64str = Buffer.from(bitmap, "kai").toString("base64");
-      return { ...v, memHeadshot: `data:image/png;base64,${base64str}` };
-    } else {
-      return { ...v };
-    }
-  })
-  res.json(getGameCommentInfoData);
+  // const getGameCommentInfoData = getGameCommentInfo
+  // .map((v, i) => {
+  //   if (v.memHeadshot.length > 20) {
+  //     local_img = `./public/uploads/${v.memHeadshot}`;
+  //     let bitmap = fs.readFileSync(local_img);
+  //     let base64str = Buffer.from(bitmap, "kai").toString("base64");
+  //     return { ...v, memHeadshot: `data:image/png;base64,${base64str}` };
+  //   } else {
+  //     return { ...v };
+  //   }
+  // })
+  res.json(getGameCommentInfo);
 });
 
 module.exports = router;
