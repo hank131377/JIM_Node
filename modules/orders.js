@@ -37,8 +37,20 @@ router.get("/ordercomplete", async (req, res) => {
 });
 
 router.get("/discount", async (req, res) => {
+  const {sid} = req.query
+  const memberBirtherSql = `SELECT memBirth FROM member WHERE membersid = ${sid}`
+  const [memberBirther] = await db.query(memberBirtherSql)
   discountSql = `SELECT * FROM discount_detail WHERE 1`;
   const [discount] = await db.query(discountSql);
-  res.json(discount);
+  const discountPersona = discount.filter((v,i)=>{
+    if(i>0 && i<=12){
+      if(i==new Date().getMonth()+1 && i==new Date(memberBirther[0].memBirth).getMonth()+1){
+        return v
+      }
+    }else{
+      return v
+    }
+  })
+  res.json(discountPersona);
 });
 module.exports = router;
