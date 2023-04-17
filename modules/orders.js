@@ -47,10 +47,16 @@ router.get("/discount", async (req, res) => {
       if(i==new Date().getMonth()+1 && i==new Date(memberBirther[0].memBirth).getMonth()+1){
         return v
       }
-    }else{
+    }if(i==0){
       return v
     }
   })
+
+  const getCouponSql =  `SELECT * FROM discount JOIN discount_detail ON discount_detail.discountID = discount.discountID WHERE membersid = '${sid}' AND discountState = '未使用'`
+  const [getCoupon] = await db.query(getCouponSql)
+  for(let i = 0 ; i <getCoupon.length;i++){
+    discountPersona.push(getCoupon[i])
+  }
   res.json(discountPersona);
 });
 module.exports = router;

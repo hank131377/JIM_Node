@@ -84,6 +84,8 @@ router
       if (linePayRes?.data?.returnCode === "0000") {
         sql = `INSERT INTO order_summary(orderSid, memberSid, gameSid, checkPrice, checkQuantity, orderState, orderTime,orderDate, orderUsername, orderPhone, orderAdress, orderEmail, orderRemark, orderDiscount, create_at) VALUES (${orderId},${member},${gamesid},${cash},${people},0,'${time}','${date}','${name}','${tel}','${address}','${email}','${remark}',${discount},now())`;
         db.query(sql);
+        const setCouponSql = `UPDATE discount SET discountState='已使用' WHERE membersid=${member}`
+        db.query(setCouponSql)
         const linePayUrl = linePayRes.data.info.paymentUrl.web;
         res.json({ url, linePayBody, headers, linePayUrl });
       } else {

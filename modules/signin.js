@@ -11,7 +11,7 @@ router.post("/store", upload.none(), async (req, res) => {
     success: false,
     error: "帳號或密碼錯誤",
     code: 0,
-    postData: req.body,
+    // postData: req.body,
   };
 
   loginSql = "SELECT * FROM store WHERE storeAccount=?";
@@ -59,7 +59,7 @@ router.post("/member", upload.none(), async (req, res) => {
     success: false,
     error: "帳號或密碼錯誤",
     code: 0,
-    postData: req.body,
+    // postData: req.body,
   };
 
   loginSql = "SELECT * FROM member WHERE memAccount=?";

@@ -174,4 +174,25 @@ router.get("/getGameComment/:sid", async (req, res) => {
   res.json(getGameCommentInfo);
 });
 
+router.get('/setcoupon',async(req,res)=>{
+  const {rand,sid}=req.query
+  const couponSql = `SELECT * FROM discount WHERE discountRand = '${rand}'`
+  const [coupon] = await db.query(couponSql)
+  if(coupon == [] || coupon[0]?.membersid !== 0){
+    res.json('優惠券輸入錯誤或已被使用')
+  }else{
+    const useCouponSql = `UPDATE discount SET membersid=${sid} WHERE discountRand = '${rand}'`
+    const [useCouponSqlInfo] = await db.query(useCouponSql)
+    res.json(rand)
+  }
+})
+
+router.get('/getcoupon',async(req,res)=>{
+  console.log(req.query)
+  const {sid} = req.query
+  const getCouponSql =  `SELECT * FROM discount JOIN discount_detail ON discount_detail.discountID = discount.discountID WHERE membersid = '${sid}'`
+  const [getCoupon] = await db.query(getCouponSql)
+res.json(getCoupon)
+})
+
 module.exports = router;
