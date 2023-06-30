@@ -1,23 +1,23 @@
-const express = require("express");
-const router = express.Router();
-const upload = require("./upload");
-const db = require("./db_connect");
-const bcrypt = require("bcrypt");
-const fs = require("fs");
+const express = require('express')
+const router = express.Router()
+const upload = require('./upload')
+const db = require('./db_connect')
+const bcrypt = require('bcrypt')
+const fs = require('fs')
 
-router.get("/", async (req, res) => {
+router.get('/', async (req, res) => {
   const {
-    searchKey = "",
-    city = "",
+    searchKey = '',
+    city = '',
     minLimit = 12,
-    difficulty = "",
-    type = "",
+    difficulty = '',
+    type = '',
     cash = 83727,
-    time = "",
-    other = "",
-    order = "gamesPrice",
-    searchSwitch = "ASC",
-  } = req.query;
+    time = '',
+    other = '',
+    order = 'gamesPrice',
+    searchSwitch = 'ASC',
+  } = req.query
 
   const gamesql = `SELECT * FROM games
       JOIN gamesdifficulty on gamesDifficulty = gamesdifficulty.gamesDifficultySid
@@ -31,9 +31,9 @@ router.get("/", async (req, res) => {
       AND gamesPrice <= ${cash} AND gamesfeature01.feature01 LIKE '%${type}%'
       AND gamestime.Time LIKE '%${time}%'  AND gamessort.Sort LIKE '%${other}%' 
       AND gamesColse = 1
-      ORDER BY ${order} ${searchSwitch}`;
-    
-  const [game] = await db.query(gamesql);
+      ORDER BY ${order} ${searchSwitch}`
+
+  const [game] = await db.query(gamesql)
 
   // const games = game
   //   .map((v, i) => {
@@ -47,19 +47,18 @@ router.get("/", async (req, res) => {
   //     }
   //   })
 
+  res.json(game)
+})
 
-  res.json(game);
-});
+router.get('/getGameSelect/:target', async (req, res) => {
+  const { target } = req.params
+  const getGameSelectSql = `SELECT * FROM ${target} WHERE 1`
+  const [getGameSelectInfo] = await db.query(getGameSelectSql)
+  res.json(getGameSelectInfo)
+})
 
-router.get("/getGameSelect/:target", async (req, res) => {
-  const { target } = req.params;
-  const getGameSelectSql = `SELECT * FROM ${target} WHERE 1`;
-  const [getGameSelectInfo] = await db.query(getGameSelectSql);
-  res.json(getGameSelectInfo);
-});
-
-router.get("/gameSingle", async (req, res) => {
-  const { sid } = req.query;
+router.get('/gameSingle', async (req, res) => {
+  const { sid } = req.query
   const gameSingleSql = `SELECT * FROM games
         JOIN gamesdifficulty on gamesDifficulty = gamesdifficulty.gamesDifficultySid
         JOIN gamesfeature01 on gamesFeature01 = gamesFeature01.gamesFeatureSid
@@ -68,17 +67,17 @@ router.get("/gameSingle", async (req, res) => {
         JOIN gamessort on gamesSort = gamessort.gamesSortSid
         JOIN store on games.storeSid= store.storeSid
         WHERE gamesSid = ${sid}
-        `;
+        `
 
-  const [gameSingleInfo] = await db.query(gameSingleSql);
+  const [gameSingleInfo] = await db.query(gameSingleSql)
   const getGameSelectSql = `
         SELECT games.gamesSid, sum(rate)/count(rate) AS rate, count(*) AS rateNum FROM comment 
         JOIN order_summary ON comment.ordersid = order_summary.orderSid 
         JOIN games ON order_summary.gameSid = games.gamesSid 
         WHERE games.gamesSid = ${sid}
         GROUP BY games.gamesSid;
-        `;
-  const [getGameSelectInfo] = await db.query(getGameSelectSql);
+        `
+  const [getGameSelectInfo] = await db.query(getGameSelectSql)
   const gamesSingle = gameSingleInfo
     // .map((v, i) => {
     //   if (v.gamesImages.length > 20) {
@@ -97,60 +96,60 @@ router.get("/gameSingle", async (req, res) => {
             rateNum: getGameSelectInfo[i].rateNum,
             rate: getGameSelectInfo[i].rate,
           }
-        : { ...v, rateNum: 0, rate: 0 };
-    });
-  res.json(gamesSingle);
-});
+        : { ...v, rateNum: 0, rate: 0 }
+    })
+  res.json(gamesSingle)
+})
 
-router.get("/filterDate", async (req, res) => {
-  const { sid, date } = req.query;
+router.get('/filterDate', async (req, res) => {
+  const { sid, date } = req.query
   const filterDateSql = `SELECT * FROM order_summary WHERE 
         gameSid = ${sid} AND orderDate LIKE '${date}'
-        `;
-  const [filterDate] = await db.query(filterDateSql);
-  res.json(filterDate);
-});
+        `
+  const [filterDate] = await db.query(filterDateSql)
+  res.json(filterDate)
+})
 
-router.get("/getCollect/:gameSid", async (req, res) => {
-  const { gameSid } = req.params;
-  const { sid } = req.query;
+router.get('/getCollect/:gameSid', async (req, res) => {
+  const { gameSid } = req.params
+  const { sid } = req.query
 
   const searchAddCollectSql = `
     SELECT * FROM gamecollect WHERE meberSid = ${sid} AND gameSid = ${gameSid}
-    `;
-  const [searchCollectDate] = await db.query(searchAddCollectSql);
+    `
+  const [searchCollectDate] = await db.query(searchAddCollectSql)
 
-  res.json(searchCollectDate);
-});
+  res.json(searchCollectDate)
+})
 
-router.get("/addCollect/:gameSid", async (req, res) => {
-  const { gameSid } = req.params;
-  const { sid } = req.query;
+router.get('/addCollect/:gameSid', async (req, res) => {
+  const { gameSid } = req.params
+  const { sid } = req.query
 
   const searchAddCollectSql = `
   SELECT * FROM gamecollect WHERE meberSid = ${sid} AND gameSid = ${gameSid}
-  `;
-  const [searchCollectDate] = await db.query(searchAddCollectSql);
-  if (searchCollectDate.length !== 0) return res.end();
+  `
+  const [searchCollectDate] = await db.query(searchAddCollectSql)
+  if (searchCollectDate.length !== 0) return res.end()
 
   const addCollectSql = `INSERT INTO gamecollect(meberSid, gameSid) VALUES (${sid},${gameSid})
-        `;
-  const [addCollectDate] = await db.query(addCollectSql);
-  res.json(addCollectDate);
-});
+        `
+  const [addCollectDate] = await db.query(addCollectSql)
+  res.json(addCollectDate)
+})
 
-router.delete("/delCollect/:gameSid", async (req, res) => {
-  const { gameSid } = req.params;
-  const { sid } = req.query;
+router.delete('/delCollect/:gameSid', async (req, res) => {
+  const { gameSid } = req.params
+  const { sid } = req.query
   const delCollectSql = `
   DELETE FROM gamecollect WHERE meberSid = ${sid} AND gameSid = ${gameSid}
-  `;
-  const [addCollectDate] = await db.query(delCollectSql);
-  res.json(addCollectDate);
-});
+  `
+  const [addCollectDate] = await db.query(delCollectSql)
+  res.json(addCollectDate)
+})
 
-router.get("/getGameComment/:sid", async (req, res) => {
-  const { sid } = req.params;
+router.get('/getGameComment/:sid', async (req, res) => {
+  const { sid } = req.params
   const getGameCommentSql = `
     SELECT * FROM games
     JOIN order_summary ON gamesSid  = order_summary.gameSid
@@ -158,8 +157,8 @@ router.get("/getGameComment/:sid", async (req, res) => {
     JOIN comment ON order_summary.orderSid = comment.ordersid
     WHERE  gamesSid = ${sid}
     ORDER BY order_summary.create_at DESC
-    `;
-  const [getGameCommentInfo] = await db.query(getGameCommentSql);
+    `
+  const [getGameCommentInfo] = await db.query(getGameCommentSql)
   // const getGameCommentInfoData = getGameCommentInfo
   // .map((v, i) => {
   //   if (v.memHeadshot.length > 20) {
@@ -171,28 +170,28 @@ router.get("/getGameComment/:sid", async (req, res) => {
   //     return { ...v };
   //   }
   // })
-  res.json(getGameCommentInfo);
-});
+  res.json(getGameCommentInfo)
+})
 
-router.get('/setcoupon',async(req,res)=>{
-  const {rand,sid}=req.query
+router.get('/setcoupon', async (req, res) => {
+  const { rand, sid } = req.query
   const couponSql = `SELECT * FROM discount WHERE discountRand = '${rand}'`
   const [coupon] = await db.query(couponSql)
-  if(coupon == [] || coupon[0]?.membersid !== 0){
+  if (coupon == [] || coupon[0]?.membersid !== 0) {
     res.json('優惠券輸入錯誤或已被使用')
-  }else{
+  } else {
     const useCouponSql = `UPDATE discount SET membersid=${sid} WHERE discountRand = '${rand}'`
     const [useCouponSqlInfo] = await db.query(useCouponSql)
     res.json(rand)
   }
 })
 
-router.get('/getcoupon',async(req,res)=>{
+router.get('/getcoupon', async (req, res) => {
   console.log(req.query)
-  const {sid} = req.query
-  const getCouponSql =  `SELECT * FROM discount JOIN discount_detail ON discount_detail.discountID = discount.discountID WHERE membersid = '${sid}'`
+  const { sid } = req.query
+  const getCouponSql = `SELECT * FROM discount JOIN discount_detail ON discount_detail.discountID = discount.discountID WHERE membersid = '${sid}'`
   const [getCoupon] = await db.query(getCouponSql)
-res.json(getCoupon)
+  res.json(getCoupon)
 })
 
-module.exports = router;
+module.exports = router
